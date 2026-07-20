@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: terraform-parse
+  labels:
+    {{- include "tripla-apps.labels" (dict "root" . "component" "terraform-parse") | nindent 4 }}
+spec:
+  replicas: {{ .Values.terraformParse.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "tripla-apps.selectorLabels" (dict "root" . "component" "terraform-parse") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "tripla-apps.labels" (dict "root" . "component" "terraform-parse") | nindent 8 }}
+    spec:
+      containers:
+        - name: terraform-parse
+          image: "{{ .Values.terraformParse.image.repository }}:{{ .Values.terraformParse.image.tag }}"
+          imagePullPolicy: {{ .Values.terraformParse.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.terraformParse.containerPort }}
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          resources:
+            {{- toYaml .Values.terraformParse.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
