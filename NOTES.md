@@ -25,7 +25,7 @@ The application enforces strict validation at the API boundary to catch errors b
 * Runs terraform validate in temporary directories during testing to prove semantic correctness.
 
 
-- Part 2 (Terraform): 
+**- Part 2 (Terraform): **
 - Issues found:
 
 EKS module pinned 19.0.0 used node_groups arg — renamed to eks_managed_node_groups in v18+. Unknown args are silently ignored, so apply succeeds but creates zero worker nodes. Worst kind of bug: no error, just a dead cluster.
@@ -44,7 +44,7 @@ Could still be enhanced: actual remote state + locking once an AWS account exist
 separate node groups for system vs. workload pods; VPC itself is assumed pre-existing rather than managed here — worth revisiting if Tripla wants 
 full network lifecycle in Terraform too.
 
-- Part 3 (Helm): 
+**- Part 3 (Helm): **
 - Problems found:
 
 backend-deployment.yaml had a stray leading \ plus wrong indentation — chart failed to render entirely.
@@ -64,7 +64,7 @@ ClusterIP; pinned image tags. Added a new terraform-parse Deployment+Service for
 Validation: helm lint → helm template (renders clean) → real deploy on kind (helm install --wait) → kubectl get endpoints confirmed non-empty for all three services
 → in-cluster curl to frontend, backend, and terraform-parse all returned correct responses, proving routing actually works end-to-end, not just "looks right on paper."
 
-- Part 4 (System Behavior): 
+**- Part 4 (System Behavior): **
 terraform-parse service: 2 replicas, gunicorn 2 workers each — fine for bursty internal traffic, not high sustained QPS. 
 - Each request writes output to local pod disk; with multiple replicas and no shared volume, generated files land on whichever pod served the request — invisible 
 - from the other. At scale this needs S3 (or just drop the file write, return content only — simpler fix). Bad payload fails fast (400) before any expensive work; 
@@ -82,9 +82,7 @@ no persistent volume backup story.
 Long-term resilience: add PDBs, cluster-autoscaler/Karpenter, multi-AZ node groups, move output storage to S3, add rate limiting + request timeouts, 
 Prometheus metrics + alerts (error rate, latency, HPA saturation) instead of just logs, and chaos-test node loss / pod eviction before calling it production-ready.
 
-- Part 5 (Approach & Tools): 
+**- Part 5 (Approach & Tools):** 
 - Used K8s documentations ,
 - Helm and Terraform documentations . 
 - Also used claude opus 4.8 in solution architecture discussion , code generation and review of my own code as well .
-- 
-- 
