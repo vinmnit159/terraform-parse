@@ -65,7 +65,7 @@ def test_gov_region_accepted():
 
 @pytest.mark.parametrize("acl", ["Private", "public", "bucket-owner-full-control"])
 def test_unknown_acl_rejected(acl):
-    with pytest.raises(ValidationError, match="acl must be one of"):
+    with pytest.raises(ValidationError, match="acl should be one of"):
         validate_payload(make_body(acl=acl))
 
 

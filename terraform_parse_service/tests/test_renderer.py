@@ -9,8 +9,8 @@ from renderer import render_s3_tf
 def test_contains_required_blocks():
     tf = render_s3_tf("eu-west-1", "private", "tripla-bucket")
     assert 'provider "aws"' in tf
-    assert 'resource "aws_s3_bucket" "this"' in tf
-    assert 'resource "aws_s3_bucket_acl" "this"' in tf
+    assert 'resource "aws_s3_bucket" "bucket"' in tf
+    assert 'resource "aws_s3_bucket_acl" "bucket"' in tf
 
 
 def test_values_are_interpolated():
@@ -24,8 +24,8 @@ def test_acl_depends_on_ownership_controls():
     # Without ownership controls, aws_s3_bucket_acl fails on modern buckets
     # (BucketOwnerEnforced default disables ACLs entirely).
     tf = render_s3_tf("eu-west-1", "private", "tripla-bucket")
-    assert 'resource "aws_s3_bucket_ownership_controls" "this"' in tf
-    assert "depends_on = [aws_s3_bucket_ownership_controls.this]" in tf
+    assert 'resource "aws_s3_bucket_ownership_controls" "bucket"' in tf
+    assert "depends_on = [aws_s3_bucket_ownership_controls.bucket]" in tf
 
 
 @pytest.mark.skipif(shutil.which("terraform") is None, reason="terraform not installed")

@@ -55,7 +55,7 @@ def validate_payload(body: object) -> tuple[str, str, str]:
 
     missing = [key for key in REQUIRED_PROPERTIES if key not in properties]
     if missing:
-        raise ValidationError(f"missing required properties: {', '.join(missing)}")
+        raise ValidationError(f"missing properties: {', '.join(missing)}")
 
     for key in REQUIRED_PROPERTIES:
         if not isinstance(properties[key], str) or not properties[key].strip():
@@ -70,7 +70,7 @@ def validate_payload(body: object) -> tuple[str, str, str]:
 
     if acl not in ALLOWED_ACLS:
         raise ValidationError(
-            f"acl must be one of: {', '.join(sorted(ALLOWED_ACLS))}"
+            f"acl should be one of: {', '.join(sorted(ALLOWED_ACLS))}"
         )
 
     if not BUCKET_RE.match(bucket_name):

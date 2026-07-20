@@ -14,23 +14,23 @@ VALID_BODY = {
         "properties": {
             "aws-region": "eu-west-1",
             "acl": "private",
-            "bucket-name": "tripla-bucket",
+            "bucket-name": "tripla-assignment-bucket",
         }
     }
 }
 
 
-def test_render_success(client, tmp_path):
+def test_renderer_success(client, tmp_path):
     resp = client.post("/api/v1/render", json=VALID_BODY)
     assert resp.status_code == 201
     data = resp.get_json()
-    assert data["filename"] == "tripla-bucket.tf"
-    assert 'resource "aws_s3_bucket" "this"' in data["terraform"]
+    assert data["filename"] == "tripla-assignment-bucket.tf"
+    assert ' "aws_s3_bucket" "bucket"' in data["terraform"]
     # File persisted to the output directory too.
-    assert (tmp_path / "tripla-bucket.tf").read_text() == data["terraform"]
+    assert (tmp_path / "tripla-assignment-bucket.tf").read_text() == data["terraform"]
 
 
-def test_render_rejects_invalid_acl(client):
+def test_renderer_rejects_invalid_acl(client):
     body = {
         "payload": {
             "properties": {
@@ -42,13 +42,13 @@ def test_render_rejects_invalid_acl(client):
     }
     resp = client.post("/api/v1/render", json=body)
     assert resp.status_code == 400
-    assert "acl must be one of" in resp.get_json()["error"]
+    assert "acl should be one of" in resp.get_json()["error"]
 
 
 def test_render_rejects_missing_properties(client):
     resp = client.post("/api/v1/render", json={"payload": {"properties": {}}})
     assert resp.status_code == 400
-    assert "missing required properties" in resp.get_json()["error"]
+    assert "missing properties" in resp.get_json()["error"]
 
 
 def test_render_rejects_non_json_body(client):
@@ -56,12 +56,12 @@ def test_render_rejects_non_json_body(client):
         "/api/v1/render", data="not json", content_type="text/plain"
     )
     assert resp.status_code == 400
-    assert "valid JSON" in resp.get_json()["error"]
+    assert "valid JSON body" in resp.get_json()["error"]
 
 
 def test_render_write_failure_returns_500(client, monkeypatch):
     def boom(*args, **kwargs):
-        raise OSError("disk full")
+        raise OSError("storage full")
 
     monkeypatch.setattr(app_module.Path, "write_text", boom)
     resp = client.post("/api/v1/render", json=VALID_BODY)

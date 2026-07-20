@@ -20,25 +20,25 @@ provider "aws" {{
   region = "{region}"
 }}
 
-resource "aws_s3_bucket" "this" {{
+resource "aws_s3_bucket" "bucket" {{
   bucket = "{bucket_name}"
 }}
 
 # ACLs require object ownership to allow them; without this block,
 # aws_s3_bucket_acl fails on buckets created with BucketOwnerEnforced
 # (the default since April 2023).
-resource "aws_s3_bucket_ownership_controls" "this" {{
-  bucket = aws_s3_bucket.this.id
+resource "aws_s3_bucket_ownership_controls" "bucket" {{
+  bucket = aws_s3_bucket.bucket.id
 
   rule {{
     object_ownership = "BucketOwnerPreferred"
   }}
 }}
 
-resource "aws_s3_bucket_acl" "this" {{
-  depends_on = [aws_s3_bucket_ownership_controls.this]
+resource "aws_s3_bucket_acl" "bucket" {{
+  depends_on = [aws_s3_bucket_ownership_controls.bucket]
 
-  bucket = aws_s3_bucket.this.id
+  bucket = aws_s3_bucket.bucket.id
   acl    = "{acl}"
 }}
 """

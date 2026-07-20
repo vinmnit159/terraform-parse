@@ -56,7 +56,7 @@ def create_app() -> Flask:
     def render():
         body = request.get_json(silent=True)
         if body is None:
-            return jsonify(error="request body must be valid JSON"), 400
+            return jsonify(error="request must have a valid JSON body"), 400
 
         try:
             region, acl, bucket_name = validate_payload(body)
