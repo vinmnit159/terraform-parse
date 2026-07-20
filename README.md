@@ -47,3 +47,85 @@ Welcome to the Tripla SRE take-home assignment! 🧑‍💻 This exercise is des
 1.  A link to your Git repository containing the complete solution.
 2.  Clear instructions in the `README.md` on how to build, test, and run your service.
 3. `NOTES.md` with explanations for API service creation, Terraform fixes, Helm fixes, multi-env thoughts, and any AI usage.
+
+---
+
+# Solution
+
+## 1. terraform_parse_service (Python/Flask)
+
+### Run locally
+```bash
+cd terraform_parse_service
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+flask --app app run --port 5000
+```
+
+### Run with Docker
+```bash
+cd terraform_parse_service
+docker build -t terraform-parse:0.1.0 .
+docker run --rm -p 5000:5000 terraform-parse:0.1.0
+```
+
+### Try it
+```bash
+curl -X POST localhost:5000/api/v1/render \
+  -H 'Content-Type: application/json' \
+  -d '{"payload":{"properties":{"aws-region":"eu-west-1","acl":"private","bucket-name":"tripla-bucket"}}}'
+
+curl localhost:5000/healthz
+```
+Response includes the rendered `.tf` content and also writes it to `terraform_parse_service/output/<bucket-name>.tf`.
+
+## 2. terraform (EKS + S3)
+
+Requires an existing VPC and at least two subnet IDs (see `terraform/envs/*.tfvars` — replace the placeholder `vpc-`/`subnet-` IDs with real ones for your account).
+
+```bash
+cd terraform
+terraform init
+terraform validate
+terraform fmt -check -recursive
+terraform plan -var-file=envs/dev.tfvars   # or envs/prod.tfvars
+```
+
+No remote backend is configured (commented template in `versions.tf`) since there's no live AWS account behind this assignment.
+
+## 3. helm (frontend + backend + terraform-parse)
+
+Local deploy on kind:
+
+```bash
+# 1. build and load the service image into the cluster
+cd terraform_parse_service
+docker build -t terraform-parse:0.1.0 .
+kind create cluster --name tripla
+kind load docker-image terraform-parse:0.1.0 --name tripla
+
+# 2. lint/render check, then install
+cd ../helm
+helm lint .
+helm template . > /dev/null   # renders cleanly
+helm install tripla . --wait --timeout 3m
+```
+
+### Verify
+
+```bash
+kubectl get pods
+kubectl get endpoints        # every service should list at least one IP:port
+
+kubectl run curl-test --rm -i --restart=Never --image=curlimages/curl:8.11.0 -- sh -c '
+  curl -s backend-svc:8080;
+  curl -s -o /dev/null -w "frontend: %{http_code}\n" frontend-svc:80;
+  curl -s -X POST terraform-parse:8080/api/v1/render \
+    -H "Content-Type: application/json" \
+    -d "{\"payload\":{\"properties\":{\"aws-region\":\"eu-west-1\",\"acl\":\"private\",\"bucket-name\":\"tripla-bucket\"}}}"'
+```
+
+Teardown: `kind delete cluster --name tripla`
+
+See `NOTES.md` for the issues found in the original Terraform/Helm code and how each was fixed.
