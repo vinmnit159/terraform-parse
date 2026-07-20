@@ -5,11 +5,9 @@ validators.py – Validation
 renderer.py – Terraform generation
 app.py – Flask API & I/O
 
-Clean separation keeps business logic testable.
+Clean separation keeps business logic moduler.
 
-API
-
-Endpoints
+API Endpoints
 
 POST /api/v1/render
 GET /healthz
@@ -40,7 +38,8 @@ Incorrect outputs.
 Old provider/version.
 No remote state.
 No environment separation.
-Changes
+
+Changes made :
 Upgraded EKS module.
 Adopted Provider 5.x S3 resources.
 Added encryption & versioning.
@@ -48,6 +47,7 @@ Parameterized bucket and cluster version.
 Added variable validation.
 Added backend template.
 Added dev & prod tfvars.
+
 Future
 Remote state & locking
 TFLint / Checkov
@@ -66,12 +66,14 @@ Hardcoded values.
 Ineffective HPA.
 Missing probes.
 Floating image tags.
-Changes
+
+Changes made :
 Parameterized templates.
 Added shared helpers.
 Fixed selectors and ports.
 Added requests, limits & probes.
 Defaulted to ClusterIP.
+
 Added terraform-parse service.
 Validation
 helm lint
@@ -88,6 +90,8 @@ Gunicorn (2 workers)
 Local file storage
 400 on invalid input
 500 on write failure
+
+
 Current Gaps
 No shared storage
 No PDB
@@ -95,13 +99,14 @@ Single node group
 No Cluster Autoscaler
 No rate limiting
 No circuit breaker
+
 Future
 S3 storage
 PDB
 Autoscaler/Karpenter
 Multi-AZ nodes
 Monitoring & alerts
-Chaos testing
+Add testcases
 
 **Part 5 – Approach & Tools**
 References
