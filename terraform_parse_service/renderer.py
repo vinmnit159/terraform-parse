@@ -1,7 +1,4 @@
-"""Render validated payload properties into Terraform HCL for an S3 bucket.
-
-Pure functions only: no I/O, no Flask imports. This keeps rendering trivially
-unit-testable and reusable outside the HTTP layer.
+"""Return a complete, valid .tf document for the given S3 bucket.
 """
 
 TF_TEMPLATE = """\
@@ -46,8 +43,5 @@ resource "aws_s3_bucket_acl" "bucket" {{
 
 def render_s3_tf(region: str, acl: str, bucket_name: str) -> str:
     """Return a complete, valid .tf document for the given S3 bucket.
-
-    Inputs are assumed to be already validated (see validators.py); values
-    are interpolated into a fixed template, never into arbitrary HCL.
     """
     return TF_TEMPLATE.format(region=region, acl=acl, bucket_name=bucket_name)

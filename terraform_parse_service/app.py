@@ -1,9 +1,4 @@
-"""Terraform-Parse service: POST a payload, get back a rendered S3 .tf file.
-
-Run locally:
-    flask --app app run --port 5000
-Production (Docker):
-    gunicorn --bind 0.0.0.0:5000 "app:create_app()"
+"""Terraform-Parse service: POST a payload, validate properties and  get back a rendered tf file
 """
 
 import json
